@@ -32,10 +32,15 @@ RUN (test ${USE_APT_MIRROR} = yes \
 
 ADD ./presto /presto
 ENV PRESTO /presto
+ENV PGPLOT_DIR /usr/lib/pgplot5
 ENV LD_LIBRARY_PATH /presto/lib
+# https://stackoverflow.com/questions/27093612/in-a-dockerfile-how-to-update-path-environment-variable
+ENV PATH="/presto/bin:${PATH}"
 
 WORKDIR /presto
 RUN (cd /presto/src && make libpresto slalib) \
-    && (cd /presto && pip3 install /presto)
+    && (cd /presto && pip3 install /presto) \
+    && (cd /presto/src && make) \
+    && (cd /presto/src && make makewisdom)
 
 # RUN python3 tests/test_presto_python.py
