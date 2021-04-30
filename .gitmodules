@@ -1,3 +1,6 @@
 [submodule "presto"]
 	path = presto
 	url = https://github.com/scottransom/presto
+[submodule "tempo"]
+	path = tempo
+	url = git://git.code.sf.net/p/tempo/tempo

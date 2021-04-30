@@ -2,6 +2,7 @@ FROM ubuntu:20.04 AS presto-dev
 LABEL maintainer="libreliu@foxmail.com"
 
 ARG USE_APT_MIRROR=yes
+ARG RUN_FFTW_WISDOM=yes
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN (test ${USE_APT_MIRROR} = yes \
@@ -27,20 +28,35 @@ RUN (test ${USE_APT_MIRROR} = yes \
                           libcfitsio-dev \
                           libpng-dev \
                           libfftw3-dev \
-                          build-essential
+                          build-essential \
+                          autoconf \
+                          automake \
+                          autotools-dev
 
 
 ADD ./presto /presto
+ADD ./tempo /tempo
+ADD ./fftw_wisdom_i5_3210m.txt /presto/lib/fftw_wisdom_i5_3210m.txt
 ENV PRESTO /presto
+ENV TEMPO /tempo
 ENV PGPLOT_DIR /usr/lib/pgplot5
 ENV LD_LIBRARY_PATH /presto/lib
 # https://stackoverflow.com/questions/27093612/in-a-dockerfile-how-to-update-path-environment-variable
 ENV PATH="/presto/bin:${PATH}"
 
-WORKDIR /presto
+WORKDIR /
 RUN (cd /presto/src && make libpresto slalib) \
     && (cd /presto && pip3 install /presto) \
     && (cd /presto/src && make) \
-    && (cd /presto/src && make makewisdom)
+    # Tempo will be installed in /usr/local/bin
+    && (cd /tempo && autoreconf --install && ./configure && make && make install) \
+    && (test ${RUN_FFTW_WISDOM} = yes \
+        && \
+        (rm /presto/lib/fftw_wisdom_i5_3210m.txt && cd /presto/src && make makewisdom) \
+        || \
+        (echo "Wisdom not created. Defaults tested on i5-3210M is used." && \
+         echo 'You may want to run "docker cp your_wisdom.txt <name>:/presto/lib/fftw_widsom"' && \
+         mv /presto/lib/fftw_wisdom_i5_3210m.txt /presto/lib/fftw_wisdom.txt \
+        );)
 
 # RUN python3 tests/test_presto_python.py
