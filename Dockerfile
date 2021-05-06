@@ -1,15 +1,18 @@
-FROM ubuntu:20.04 AS presto-dev
+FROM nvidia/cuda:11.3.0-devel-ubuntu20.04 AS presto-cudev
 LABEL maintainer="libreliu@foxmail.com"
 
 ARG USE_APT_MIRROR=yes
-ARG RUN_FFTW_WISDOM=yes
 
+# https://github.com/microsoft/WSL/issues/5682
+# walkaround for silly NVIDIA who automatically jumps nvidia.com -> nvidia.cn
 ENV DEBIAN_FRONTEND noninteractive
 RUN (test ${USE_APT_MIRROR} = yes \
        && \
        (sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list) \
        || \
        (echo "APT mirror config untouched.");) \
+    && apt-key adv --fetch-keys https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub \
+    && sh -c 'echo "deb https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64 /" > /etc/apt/sources.list.d/cuda.list' \
     && ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && apt-get update \
     && apt-get install -y tzdata \
@@ -31,12 +34,14 @@ RUN (test ${USE_APT_MIRROR} = yes \
                           build-essential \
                           autoconf \
                           automake \
-                          autotools-dev
+                          autotools-dev \
+                          intel-mkl \
+    && apt-get clean
 
+# git is used for tempo's get_version_id.sh
 
 ADD ./presto /presto
 ADD ./tempo /tempo
-ADD ./fftw_wisdom_i5_3210m.txt /presto/lib/fftw_wisdom_i5_3210m.txt
 ENV PRESTO /presto
 ENV TEMPO /tempo
 ENV PGPLOT_DIR /usr/lib/pgplot5
@@ -49,14 +54,6 @@ RUN (cd /presto/src && make libpresto slalib) \
     && (cd /presto && pip3 install /presto) \
     && (cd /presto/src && make) \
     # Tempo will be installed in /usr/local/bin
-    && (cd /tempo && autoreconf --install && ./configure && make && make install) \
-    && (test ${RUN_FFTW_WISDOM} = yes \
-        && \
-        (rm /presto/lib/fftw_wisdom_i5_3210m.txt && cd /presto/src && make makewisdom) \
-        || \
-        (echo "Wisdom not created. Defaults tested on i5-3210M is used." && \
-         echo 'You may want to run "docker cp your_wisdom.txt <name>:/presto/lib/fftw_widsom"' && \
-         mv /presto/lib/fftw_wisdom_i5_3210m.txt /presto/lib/fftw_wisdom.txt \
-        );)
+    && (cd /tempo && autoreconf --install && ./configure && make && make install)
 
 # RUN python3 tests/test_presto_python.py
