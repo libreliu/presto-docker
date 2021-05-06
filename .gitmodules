@@ -1,6 +1,6 @@
 [submodule "presto"]
 	path = presto
-	url = https://github.com/scottransom/presto
+	url = git@github.com:libreliu/presto
 [submodule "tempo"]
 	path = tempo
-	url = git://git.code.sf.net/p/tempo/tempo
+	url = git@github.com:libreliu/tempo
