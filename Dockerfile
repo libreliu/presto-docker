@@ -3,6 +3,7 @@ LABEL maintainer="libreliu@foxmail.com"
 
 ARG USE_APT_MIRROR=yes
 ARG RUN_FFTW_WISDOM=yes
+ARG GEN_PYTHON_SOFTLINK=yes
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN (test ${USE_APT_MIRROR} = yes \
@@ -58,5 +59,11 @@ RUN (cd /presto/src && make libpresto slalib) \
          echo 'You may want to run "docker cp your_wisdom.txt <name>:/presto/lib/fftw_widsom"' && \
          mv /presto/lib/fftw_wisdom_i5_3210m.txt /presto/lib/fftw_wisdom.txt \
         );)
+
+RUN (test ${GEN_PYTHON_SOFTLINK} = yes \
+       && \
+       (ln -s /usr/bin/python3 /usr/bin/python) \
+       || \
+       (echo "python ln -s config untouched.");)
 
 # RUN python3 tests/test_presto_python.py
