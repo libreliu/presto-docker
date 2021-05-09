@@ -2,7 +2,7 @@ FROM ubuntu:20.04 AS presto-dev
 LABEL maintainer="libreliu@foxmail.com"
 
 ARG USE_APT_MIRROR=yes
-ARG RUN_FFTW_WISDOM=yes
+ARG RUN_FFTW_WISDOM=no
 ARG GEN_PYTHON_SOFTLINK=yes
 
 ENV DEBIAN_FRONTEND noninteractive
