@@ -1,7 +1,7 @@
 [submodule "presto"]
 	path = presto
 	url = git@github.com:libreliu/presto
-	branch = cufft
+	branch = icelake-server
 [submodule "tempo"]
 	path = tempo
 	url = git@github.com:libreliu/tempo
