@@ -1,7 +1,14 @@
 [submodule "presto"]
 	path = presto
 	url = git@github.com:libreliu/presto
-	branch = cufft
 [submodule "tempo"]
 	path = tempo
 	url = git@github.com:libreliu/tempo
+[submodule "presto-mkl"]
+	path = presto-mkl
+	url = git@github.com:libreliu/presto
+	branch = mkl
+[submodule "presto-cufft"]
+	path = presto-cufft
+	url = git@github.com:libreliu/presto
+	branch = cufft
