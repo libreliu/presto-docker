@@ -1,2 +1,2 @@
 #!/bin/sh
-LD_LIBRARY_PATH=/presto-mkl/lib exec /presto_mkl/bin/realfft $@ 
+LD_LIBRARY_PATH=/presto-mkl/lib exec /presto-mkl/bin/realfft $@ 

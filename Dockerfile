@@ -34,7 +34,6 @@ RUN ((sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list)
 
 ADD ./tempo /tempo
 ENV PGPLOT_DIR /usr/lib/pgplot5
-ENV LD_LIBRARY_PATH /presto/lib
 # https://stackoverflow.com/questions/27093612/in-a-dockerfile-how-to-update-path-environment-variable
 ADD ./links /links
 ENV PATH="/links:/presto/bin:${PATH}"
@@ -45,26 +44,31 @@ RUN (cd /tempo && autoreconf --install && ./configure && make && make install)
 
 # install PRESTO_GPU
 ADD ./presto_gpu /presto_gpu
-ENV PRESTO /presto_gpu
 ADD ./fftw_wisdom_icelake_asc.txt /presto_gpu/lib/fftw_wisdom.txt
+ENV PRESTO /presto_gpu
+ENV LD_LIBRARY_PATH /presto_gpu/lib
 RUN (cd /presto_gpu/src && make libpresto slalib) \
     && (cd /presto_gpu/src && make)
 
 # install PRESTO-MKL
 ADD ./presto-mkl /presto-mkl
-ENV PRESTO /presto_mkl
-ADD ./fftw_wisdom.txt /presto-mkl/lib/fftw_wisdom.txt
+ADD ./fftw_wisdom_icelake_asc.txt /presto-mkl/lib/fftw_wisdom.txt
+ENV PRESTO /presto-mkl
+ENV LD_LIBRARY_PATH /presto-mkl/lib
 RUN (cd /presto-mkl/src && make libpresto slalib) \
     && (cd /presto-mkl/src && make)
 
 # install PRESTO (with python)
 ADD ./presto /presto
+ADD ./fftw_wisdom_icelake_asc.txt /presto/lib/fftw_wisdom.txt
 ENV PRESTO /presto
-ADD ./fftw_wisdom.txt /presto/lib/fftw_wisdom.txt
+ENV LD_LIBRARY_PATH /presto/lib
 RUN (cd /presto/src && make libpresto slalib) \
     && (cd /presto && pip3 install /presto) \ 
     && (cd /presto/src && make && make mpi)
-RUN python3 tests/test_presto_python.py
+RUN cd /presto && python3 tests/test_presto_python.py
 
+ENV PRESTO /presto
+ENV LD_LIBRARY_PATH /presto/lib
 RUN ln -s /usr/bin/python3 /usr/bin/python
 WORKDIR /
