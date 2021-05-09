@@ -32,7 +32,8 @@ RUN (test ${USE_APT_MIRROR} = yes \
                           build-essential \
                           autoconf \
                           automake \
-                          autotools-dev
+                          autotools-dev \
+                          openmpi-bin
 
 
 ADD ./presto /presto
@@ -48,7 +49,7 @@ ENV PATH="/presto/bin:${PATH}"
 WORKDIR /
 RUN (cd /presto/src && make libpresto slalib) \
     && (cd /presto && pip3 install /presto) \
-    && (cd /presto/src && make) \
+    && (cd /presto/src && make && make mpi) \
     # Tempo will be installed in /usr/local/bin
     && (cd /tempo && autoreconf --install && ./configure && make && make install) \
     && (test ${RUN_FFTW_WISDOM} = yes \
