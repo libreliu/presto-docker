@@ -37,7 +37,7 @@ RUN (test ${USE_APT_MIRROR} = yes \
 
 ADD ./presto /presto
 ADD ./tempo /tempo
-ADD ./fftw_wisdom_i5_3210m.txt /presto/lib/fftw_wisdom_i5_3210m.txt
+ADD ./fftw_wisdom_icelake_asc.txt /presto/lib/fftw_wisdom_icelake_asc.txt
 ENV PRESTO /presto
 ENV TEMPO /tempo
 ENV PGPLOT_DIR /usr/lib/pgplot5
@@ -53,11 +53,11 @@ RUN (cd /presto/src && make libpresto slalib) \
     && (cd /tempo && autoreconf --install && ./configure && make && make install) \
     && (test ${RUN_FFTW_WISDOM} = yes \
         && \
-        (rm /presto/lib/fftw_wisdom_i5_3210m.txt && cd /presto/src && make makewisdom) \
+        (rm /presto/lib/fftw_wisdom_icelake_asc.txt && cd /presto/src && make makewisdom) \
         || \
-        (echo "Wisdom not created. Defaults tested on i5-3210M is used." && \
+        (echo "Wisdom not created. Defaults tested on icelake asc machine is used." && \
          echo 'You may want to run "docker cp your_wisdom.txt <name>:/presto/lib/fftw_widsom"' && \
-         mv /presto/lib/fftw_wisdom_i5_3210m.txt /presto/lib/fftw_wisdom.txt \
+         mv /presto/lib/fftw_wisdom_icelake_asc.txt /presto/lib/fftw_wisdom.txt \
         );)
 
 RUN (test ${GEN_PYTHON_SOFTLINK} = yes \
